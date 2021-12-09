@@ -1879,6 +1879,7 @@ static void hls_prediction_unit(HEVCContext *s, int x0, int y0,
         ff_hevc_luma_mv_merge_mode(s, x0, y0, nPbW, nPbH, log2_cb_size,
                                    partIdx, merge_idx, &current_mv);
     } else {
+        // Touches CABAC
         hevc_luma_mv_mvp_mode(s, x0, y0, nPbW, nPbH, log2_cb_size,
                               partIdx, merge_idx, &current_mv);
     }
@@ -1903,6 +1904,7 @@ static void hls_prediction_unit(HEVCContext *s, int x0, int y0,
         hevc_await_progress(s, ref1, &current_mv.mv[1], y0, nPbH);
     }
 
+    /*
     if (current_mv.pred_flag == PF_L0) {
         int x0_c = x0 >> s->ps.sps->hshift[1];
         int y0_c = y0 >> s->ps.sps->vshift[1];
@@ -1960,6 +1962,7 @@ static void hls_prediction_unit(HEVCContext *s, int x0, int y0,
                          x0_c, y0_c, nPbW_c, nPbH_c, &current_mv, 1);
         }
     }
+    */
 }
 
 /**

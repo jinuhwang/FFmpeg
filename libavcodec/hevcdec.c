@@ -1905,7 +1905,7 @@ static void hls_prediction_unit(HEVCContext *s, int x0, int y0,
         hevc_await_progress(s, ref1, &current_mv.mv[1], y0, nPbH);
     }
 
-    /* JINu
+    /* JINU
     if (current_mv.pred_flag == PF_L0) {
         int x0_c = x0 >> s->ps.sps->hshift[1];
         int y0_c = y0 >> s->ps.sps->vshift[1];
@@ -2316,6 +2316,17 @@ static int hls_coding_unit(HEVCContext *s, int x0, int y0, int log2_cb_size)
     }
 
     set_ct_depth(s, x0, y0, log2_cb_size, lc->ct_depth);
+
+    #define FRAME_WIDTH 1280
+    #define FRAME_HEIGHT 720
+    #define FRAME_INDEX(x, y, idx) (idx + (x >> 3) * 8 + (y >> 3) * (FRAME_WIDTH >> 3) * 8) // Use row major
+    if ((x0 % 8 == 0) && (y0 % 8 == 0)) {
+			AV_COPY32(&s->frame->data[0][FRAME_INDEX(x0, y0, 0)], &lc->pu.mvd);
+            s->frame->data[0][FRAME_INDEX(x0, y0, 5)] = lc->cu.pred_mode; // Doesn't work
+            s->frame->data[0][FRAME_INDEX(x0, y0, 6)] = lc->cu.part_mode;
+    }
+
+
 
     return 0;
 }

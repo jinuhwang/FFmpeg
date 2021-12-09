@@ -10,8 +10,8 @@ def make_install(ctx):
 
 @task
 def check(ctx):
-    INPUT = "/workspace/10m.mp4"
-    GT_HASH = "9088fe510aea654fceea87a8113e470f"
+    INPUT = "/ssd3/h265/archie/day1-10m-crf-26-slow.mp4"
+    GT_HASH = "b388c1b1320fbb6206516c6a31be9ebc"
 
     make_install(ctx)
     with tempfile.NamedTemporaryFile(mode='r') as f:
@@ -33,7 +33,7 @@ def md5(ctx, target):
 @task
 def visualize(ctx):
     make_install(ctx)
-    INPUT = "/ssd3/h265/archie/day1-1s-crf-26-slow.mp4"
+    INPUT = "/ssd3/h265/archie/day1-1m-crf-26-slow.mp4"
     OUTPUT = "/tmp/raw.dump"
     ctx.run(f"{DUMP} {INPUT} {OUTPUT}", echo=True)
 

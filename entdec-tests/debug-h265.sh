@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOCATION=/ssd3/h265/archie/day1-30m-crf-26-slow.mp5
+LOCATION=/ssd3/h265/archie/day1-1m-crf-26-slow.mp4
 
 gdb --args \
 gst-launch-1.0 \

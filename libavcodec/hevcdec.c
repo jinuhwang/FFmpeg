@@ -2317,14 +2317,21 @@ static int hls_coding_unit(HEVCContext *s, int x0, int y0, int log2_cb_size)
 
     set_ct_depth(s, x0, y0, log2_cb_size, lc->ct_depth);
 
+    // JINU: Extraction
     #define FRAME_WIDTH 1280
     #define FRAME_HEIGHT 720
-    #define FRAME_INDEX(x, y, idx) (idx + (x >> 3) * 8 + (y >> 3) * (FRAME_WIDTH >> 3) * 8) // Use row major
-    if ((x0 % 8 == 0) && (y0 % 8 == 0)) {
-			AV_COPY32(&s->frame->data[0][FRAME_INDEX(x0, y0, 0)], &lc->pu.mvd);
-            s->frame->data[0][FRAME_INDEX(x0, y0, 5)] = lc->cu.pred_mode; // Doesn't work
-            s->frame->data[0][FRAME_INDEX(x0, y0, 6)] = lc->cu.part_mode;
-    }
+    /* #define FRAME_INDEX(x, y, idx) (idx + (x >> 2) * 8 + (y >> 2) * (FRAME_WIDTH >> 2) * 8) // Use row major */
+    /* if ((x0 % 4 == 0) && (y0 % 4 == 0)) { */
+			/* AV_COPY32(&s->frame->data[0][FRAME_INDEX(x0, y0, 0)], &lc->pu.mvd); */
+    /*         s->frame->data[0][FRAME_INDEX(x0, y0, 5)] = lc->cu.pred_mode; // Doesn't work */
+    /*         s->frame->data[0][FRAME_INDEX(x0, y0, 6)] = lc->cu.part_mode; */
+    /* } */
+
+    const int extract_idx = (x0 >> 1) + (FRAME_WIDTH >> 1) * (y0 >> 1);
+    s->frame->data[0][2*extract_idx + 0] = (UINT8_MAX >> 1) + av_clip_int8_c(lc->pu.mvd.x);
+    s->frame->data[0][2*extract_idx + 1] = (UINT8_MAX >> 1) + av_clip_int8_c(lc->pu.mvd.y);
+    s->frame->data[1][extract_idx] = lc->cu.pred_mode + 1;
+    s->frame->data[2][extract_idx] = lc->cu.part_mode + 1;
 
 
 

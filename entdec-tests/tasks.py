@@ -10,8 +10,8 @@ def make_install(ctx):
 
 @task
 def check(ctx):
-    INPUT = "/ssd3/h265/archie/day1-10m-crf-26-slow.mp4"
-    GT_HASH = "b388c1b1320fbb6206516c6a31be9ebc"
+    INPUT = "/ssd3/h265/archie/profile/day1-10m-crf-26-slow.mp4"
+    GT_HASH = "cef8815c217480edb0a98ca5c46f9d44"
 
     make_install(ctx)
     with tempfile.NamedTemporaryFile(mode='r') as f:

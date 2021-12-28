@@ -1,0 +1,42 @@
+from invoke import task
+import tempfile
+
+DUMP = "./dump.sh"
+
+
+@task
+def make_install(ctx):
+    ctx.run("make install -C .. -j`nproc`", echo=True)
+
+@task
+def check(ctx):
+    INPUT = "/ssd3/h265/archie/profile/day1-10m-crf-26-slow.mp4"
+    GT_HASH = "cef8815c217480edb0a98ca5c46f9d44"
+
+    make_install(ctx)
+    with tempfile.NamedTemporaryFile(mode='r') as f:
+        ctx.run(f"{DUMP} {INPUT} {f.name}", echo=True)
+        hashed = md5(ctx, f.name)
+
+    print("*" * 30)
+    print(hashed == GT_HASH)
+    print("*" * 30)
+
+
+@task
+def md5(ctx, target):
+    ret = ctx.run(f"md5sum {target}", echo=True)
+    hashed = ret.stdout.split()[0]
+    return hashed
+
+
+@task
+def visualize(ctx):
+    make_install(ctx)
+    INPUT = "/ssd1/archie/day1-10s.mp4"
+    OUTPUT = "/tmp/raw.dump"
+    ctx.run(f"{DUMP} {INPUT} {OUTPUT}", echo=True)
+
+
+
+

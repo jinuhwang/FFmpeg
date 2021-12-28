@@ -28,11 +28,13 @@
 
 #include "config.h"
 
+#include "get_bits.h"
 #include "libavutil/common.h"
 #include "libavutil/intreadwrite.h"
 #include "avcodec.h"
 #include "h264dec.h"
 #include "h264_ps.h"
+#include "mpegutils.h"
 #include "qpeldsp.h"
 #include "thread.h"
 
@@ -814,4 +816,42 @@ void ff_h264_hl_decode_mb(const H264Context *h, H264SliceContext *sl)
         hl_decode_mb_simple_16(h, sl);
     } else
         hl_decode_mb_simple_8(h, sl);
+}
+
+// JINU
+void extract_metadata(const H264Context *h, H264SliceContext *sl)
+{
+    const int mb_x = sl->mb_x;
+    const int mb_y = sl->mb_y;
+    const int mb_xy   = sl->mb_xy;
+    const int mb_type = h->cur_pic.mb_type[mb_xy];
+
+    uint8_t mb_weight;
+
+    if (IS_SKIP(mb_type))
+        mb_weight = 0;
+    else if (IS_16X16(mb_type))
+        mb_weight = 1;
+    else if (IS_8X16(mb_type))
+        mb_weight = 2;
+    else if (IS_16X8(mb_type))
+        mb_weight = 3;
+    else if (IS_8X8(mb_type))
+        mb_weight = 4;
+    else if (IS_INTRA16x16(mb_type))
+        mb_weight = 5;
+    else if (IS_INTRA4x4(mb_type))
+        mb_weight = 6;
+    else if (IS_PCM(mb_type))
+        mb_weight = 7;
+
+    const int b_stride = h->b_stride;
+    const int b_xy = 4 * mb_x + 4 * mb_y * b_stride;
+    int16_t (*mv)[2] = &h->cur_pic.motion_val[0][b_xy + 0 * b_stride];
+
+    const int idx = mb_x + mb_y * h->mb_width;
+    uint8_t *dst = h->cur_pic.f->data[0] + idx * 4;
+    *(dst + 0) = mb_weight;
+    *(dst + 1) = (uint8_t) (av_clip_int8_c((*mv)[0]) + 127);
+    *(dst + 2) = (uint8_t) (av_clip_int8_c((*mv)[1]) + 127);
 }

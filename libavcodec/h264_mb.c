@@ -828,22 +828,20 @@ void extract_metadata(const H264Context *h, H264SliceContext *sl)
 
     uint8_t mb_weight;
 
-    if (IS_SKIP(mb_type))
-        mb_weight = 0;
-    else if (IS_16X16(mb_type))
+    if (IS_INTRA(mb_type))
+        mb_weight = 6;
+    else if (IS_SKIP(mb_type) || IS_DIRECT(mb_type))
         mb_weight = 1;
-    else if (IS_8X16(mb_type))
+    else if (IS_SUB_4X4(sl->sub_mb_type[0]))
+        mb_weight = 5;
+    else if (IS_16X16(mb_type))
         mb_weight = 2;
-    else if (IS_16X8(mb_type))
+    else if (IS_16X8(mb_type) || IS_8X16(mb_type))
         mb_weight = 3;
     else if (IS_8X8(mb_type))
         mb_weight = 4;
-    else if (IS_INTRA16x16(mb_type))
-        mb_weight = 5;
-    else if (IS_INTRA4x4(mb_type))
-        mb_weight = 6;
-    else if (IS_PCM(mb_type))
-        mb_weight = 7;
+    else
+        mb_weight = 0;
 
     const int b_stride = h->b_stride;
     const int b_xy = 4 * mb_x + 4 * mb_y * b_stride;
@@ -852,6 +850,6 @@ void extract_metadata(const H264Context *h, H264SliceContext *sl)
     const int idx = mb_x + mb_y * h->mb_width;
     uint8_t *dst = h->cur_pic.f->data[0] + idx * 4;
     *(dst + 0) = mb_weight;
-    *(dst + 1) = (uint8_t) (av_clip_int8_c((*mv)[0]) + 127);
-    *(dst + 2) = (uint8_t) (av_clip_int8_c((*mv)[1]) + 127);
+    *(dst + 1) = (uint8_t) av_clip_uint8_c(abs((*mv)[0]));
+    *(dst + 2) = (uint8_t) av_clip_uint8_c(abs((*mv)[1]));
 }
